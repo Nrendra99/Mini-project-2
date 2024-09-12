@@ -125,9 +125,8 @@ public class AppointmentServiceImpl implements AppointmentService {
         availableAppointment.setPatient(patient);
         availableAppointment.setAvailable(false);
         availableAppointment.setStatus("BOOKED");
-        availableAppointment.setMedications(null);
         availableAppointment.setSymptoms(availableAppointment.getSymptoms());
-       
+ 
         return appointmentRepository.save(availableAppointment);
     }
     /**

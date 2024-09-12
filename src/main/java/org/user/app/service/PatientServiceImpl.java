@@ -74,6 +74,7 @@ public class PatientServiceImpl implements PatientService {
      * @param email the email address of the patient to be retrieved
      * @return the patient entity associated with the given email address
      */
+    @Override
     public Patient getPatientByEmail(String email) {
         return patientRepository.findByEmail(email);
     }
@@ -96,6 +97,7 @@ public class PatientServiceImpl implements PatientService {
         updatedPatient.setPassword(encryptedPassword);
         return patientRepository.save(updatedPatient);
     }
+ 
 }
         
     
