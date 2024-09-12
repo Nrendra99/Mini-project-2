@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Doctor Appointments</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Center-aligns the heading and adds a background color */
+        h1 {
+           text-align: center;
+           background-color: rgba(224, 116, 15, 0.932);
+           color: rgb(0, 0, 0);
+           padding: 5px;
+       }
+        body{
+           text-align: center;
+       }
+   </style>
+</head>
+<body>
+    <h1>Appointment Management System</h1>
+<div class="container mt-5">
+    <h2>Appointments for <span th:text="${date}"></span></h2>
+    
+    <!-- Form to select a different date -->
+    <form th:action="@{/doctors/appointments}" method="get">
+        <div class="mb-3">
+            <label for="date" class="form-label">Select Date</label>
+            <input type="date" class="form-control" id="date" name="date" required>
+            <input type="hidden" class="form-control" id="doctorId" name="doctorId" th:value="${doctorId}"> 
+        </div>
+        <button type="submit" class="btn btn-primary">View</button>
+    </form>
+
+    <!-- Table to display appointments -->
+    <table class="table table-bordered mt-3">
+        <thead class="table-dark">
+            <tr>
+                <th>Time</th>
+                <th>Patient Name</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="appointment : ${appointments}">
+                <td th:text="${appointment.startTime}"></td>
+                <td th:text="${appointment.patient != null ? appointment.patient.firstName + ' ' + appointment.patient.lastName : ''}"></td>
+                <td th:text="${appointment.status}"></td>
+                <td>
+                    <div>
+                        <a th:href="@{/medications/getForm(appointmentId=${appointment.Id})}" class="btn btn-primary ">Add New Medication</a>
+                        <a th:href="@{/medications/listMed(appointmentId=${appointment.Id})}" class="btn btn-primary ">List Medications</a>
+                        <form th:action="@{/doctors/updateStatus}" method="post" class="d-inline">
+                            <input type="hidden" name="appointmentId" th:value="${appointment.id}" />
+                            <input type="hidden" name="status" value="COMPLETED" />
+                            <button type="submit" class="btn btn-warning ">Update Status to Completed</button>
+                        </form>    
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+     <!-- Display a message if no appointments are available -->
+     <div th:if="${errorMessage}" class="alert alert-info mt-3" role="alert">
+        <span th:text="${errorMessage}"></span>
+    </div>
+    <!-- Back button -->
+    <a href="/doctors/view" class="btn btn-primary mt-3">Back to Dashboard</a>
+</div>
+
+<!-- Bootstrap JS and dependencies -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

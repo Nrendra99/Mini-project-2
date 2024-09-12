@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Appointment Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<style>
+    /* Center-aligns the heading and adds a background color */
+    h1 {
+      text-align: center;
+      background-color: rgba(224, 116, 15, 0.932);
+      color: rgb(0, 0, 0);
+      padding: 5px;
+  }
+   /* Center-aligns subheading */
+  h2 {
+   text-align:center ;
+  }
+   </style>
+<body>
+    <h1>Appointment Management System</h1>
+<div class="container">
+    <h2>Appointment Details</h2>
+    <!-- Appointment Card -->
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5 class="card-title">Appointment ID: <span th:text="${appointment.Id}"></span></h5>
+            <p class="card-text"><strong>Patient:</strong> <span th:text="${appointment.patient.firstName + ' ' + appointment.patient.lastName}"></span></p>
+            <p class="card-text"><strong>Doctor:</strong> <span th:text="${appointment.doctor.firstName + ' ' + appointment.doctor.lastName}"></span></p>
+            <p class="card-text"><strong>Date:</strong> <span th:text="${appointment.appointmentDate}"></span></p>
+            <p class="card-text"><strong>Start Time:</strong> <span th:text="${appointment.startTime}"></span></p>
+            <p class="card-text"><strong>End Time:</strong> <span th:text="${appointment.endTime}"></span></p>
+            <p class="card-text"><strong>Status:</strong> <span th:text="${appointment.status}"></span></p> 
+            <p class="card-text"><strong>Symptoms:</strong> <span th:text="${appointment.symptoms}"></span></p>
+        </div>
+    </div>
+    <div class="text-center">
+    <a th:href="@{/appointments/viewAll?patientId={patientId}(patientId=${appointment.patient.Id})}" class="btn btn-primary">Back to Appointments</a>
+</div>
+</body>
+</html>

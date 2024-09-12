@@ -1,0 +1,80 @@
+<!-- view-appointments.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>View Appointments</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+         /* Center-aligns the heading and adds a background color */
+         h1 {
+            text-align: center;
+            background-color: rgba(224, 116, 15, 0.932);
+            color: rgb(0, 0, 0);
+            padding: 5px;
+        }
+         body{
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Appointment Management System</h1><br>
+    <div class="container">
+        <h2>View Appointments</h2>
+
+        <!-- Form to filter appointments by status -->
+        <form action="#" th:action="@{/appointments/viewAll}" method="get">
+
+            <!-- Patient's ID -->
+         <div class="mb-3">
+         <input type="hidden" name="patientId" th:value="${patient.Id}" readonly>
+         </div>
+
+            <div class="form-group">
+                <label for="status">Select Appointment Status</label>
+                <select class="form-control" id="status" name="status">
+                    <option value="Booked" th:selected="${status == 'Booked'}">Booked</option>
+                    <option value="Completed" th:selected="${status == 'Completed'}">Completed</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Filter</button>
+        </form>
+    
+        <!-- Display the appointments -->
+        <h3>Appointments - Status: <span th:text="${status}"></span></h3>
+        <table class="table table-bordered">
+            <thead class="table-dark">
+                <tr>
+                    <th>Appointment ID</th>
+                    <th>Date</th>
+                    <th>Doctor</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="appointment : ${appointments}">
+                    <td th:text="${appointment.Id}"></td>
+                    <td th:text="${appointment.appointmentDate}"></td>
+                    <td th:text="${appointment.doctor.firstName + ' ' + appointment.doctor.lastName}"></td>
+                    <td th:text="${appointment.status}"></td>
+                    <td>
+                        <a th:href="@{/appointments/view/{appointmentId}(appointmentId=${appointment.id})}" class="btn btn-primary">View</a>
+                        <form th:action="@{/appointments/cancel}" method="post" style="display:inline;">
+                            <input type="hidden" name="appointmentId" th:value="${appointment.id}" />
+                            <input type="hidden" name="patientId" th:value="${patient.id}" />
+                            <button type="submit" class="btn btn-danger" >Cancel</button>
+                        </form>
+                        <a th:href="@{/appointments/listMed(appointmentId=${appointment.Id})}" class="btn btn-primary ">List Medications</a>
+                    </td>
+            </tbody>
+        </table>
+              <a href="/patients/view" class="btn btn-primary mt-3">Back to Dashboard</a><br><br>
+              <!-- Display error message if present -->
+    <div th:if="${errorMessage}" class="alert alert-danger">
+        <span th:text="${errorMessage}"></span>
+    </div>
+    </div>
+</body>
+</html>
