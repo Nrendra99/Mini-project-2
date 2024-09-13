@@ -48,7 +48,7 @@ public class AppointmentController {
     @GetMapping("/availableDoctors")
     @Operation(summary = "Show the form to select a date for available doctors")
     public String showAvailableDoctorsForm(Model model) {
-        model.addAttribute("date", LocalDate.now()); // Set default date
+        model.addAttribute("date", LocalDate.now()); 
         return "availableDoctors";
     }
 
@@ -65,8 +65,9 @@ public class AppointmentController {
         @ApiResponse(responseCode = "200", description = "Doctors found"),
         @ApiResponse(responseCode = "400", description = "Invalid date format")
     })
-    public String viewAvailableDoctors(@RequestParam @Parameter(description = "Date to check for available doctors") LocalDate date, 
-                                       Model model) {
+    public String viewAvailableDoctors(
+            @RequestParam @Parameter(description = "Date to check for available doctors") LocalDate date, 
+            Model model) {
         try {
             List<Doctor> doctors = appointmentServiceImpl.findAvailableDoctorsOnDate(date);
             model.addAttribute("doctors", doctors);
@@ -92,12 +93,12 @@ public class AppointmentController {
         @ApiResponse(responseCode = "400", description = "Invalid doctor ID or date format"),
         @ApiResponse(responseCode = "404", description = "No available appointments found")
     })
-    public String viewAvailableAppointments(@RequestParam Long doctorId,
-                                            @RequestParam LocalDate date, 
-                                            Model model) {
+    public String viewAvailableAppointments(
+            @RequestParam Long doctorId,
+            @RequestParam LocalDate date, 
+            Model model) {
         try {
             List<Appointment> appointments = appointmentServiceImpl.findAvailableAppointments(doctorId, date);
-
             Doctor doctor = doctorServiceImpl.getDoctorById(doctorId)
                                              .orElseThrow(() -> new DoctorNotFoundException("Doctor with ID " + doctorId + " not found"));
             model.addAttribute("appointments", appointments);
@@ -125,11 +126,12 @@ public class AppointmentController {
         @ApiResponse(responseCode = "200", description = "Appointment found"),
         @ApiResponse(responseCode = "404", description = "Appointment not found")
     })
-    public String getBookingForm(@PathVariable Long appointmentId, Model model) {
+    public String getBookingForm(
+            @PathVariable Long appointmentId, 
+            Model model) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String loggedInEmail = authentication.getName();
 
-        // Fetch the patient by email
         Patient patient = patientServiceImpl.getPatientByEmail(loggedInEmail);
         model.addAttribute("patient", patient);
 
@@ -153,7 +155,10 @@ public class AppointmentController {
         @ApiResponse(responseCode = "302", description = "Appointment booked successfully"),
         @ApiResponse(responseCode = "400", description = "Invalid patient ID or appointment ID")
     })
-    public String bookAppointment(@RequestParam Long patientId, @RequestParam Long appointmentId, @RequestParam String symptoms) {
+    public String bookAppointment(
+            @RequestParam Long patientId, 
+            @RequestParam Long appointmentId, 
+            @RequestParam String symptoms) {
         Appointment appointment = appointmentServiceImpl.findAppointmentById(appointmentId);
         appointment.setSymptoms(symptoms); // Set symptoms
         appointmentServiceImpl.bookAppointment(patientId, appointment);
@@ -175,16 +180,19 @@ public class AppointmentController {
         @ApiResponse(responseCode = "302", description = "Appointment cancelled successfully"),
         @ApiResponse(responseCode = "400", description = "Invalid patient ID or appointment ID")
     })
-    public String cancelAppointment(@RequestParam Long patientId, @RequestParam Long appointmentId, Model model) {
+    public String cancelAppointment(
+            @RequestParam Long patientId, 
+            @RequestParam Long appointmentId, 
+            Model model) {
         try {
             appointmentServiceImpl.cancelAppointment(appointmentId, patientId);
             return "redirect:/appointments/viewAll?patientId=" + patientId;
         } catch (CannotCancelWithinFourHoursException ex) {
-        	Patient patient = patientServiceImpl.getPatientById(patientId)
-        	               .orElseThrow(() -> new PatientNotFoundException("Patient with ID " + patientId + " not found"));
-        	model.addAttribute("patient" ,patient);
+            Patient patient = patientServiceImpl.getPatientById(patientId)
+                                               .orElseThrow(() -> new PatientNotFoundException("Patient with ID " + patientId + " not found"));
+            model.addAttribute("patient", patient);
             model.addAttribute("errorMessage", ex.getMessage());
-            return "viewAppointments"; // Show error on the same view
+            return "viewAppointments"; 
         }
     }
 
@@ -202,27 +210,28 @@ public class AppointmentController {
         @ApiResponse(responseCode = "200", description = "Appointments found"),
         @ApiResponse(responseCode = "400", description = "Invalid patient ID or status")
     })
-    public String getAppointmentsByStatusAndPatientId(@RequestParam Long patientId,
-                                                      @RequestParam(required = false, defaultValue = "Booked") String status, 
-                                                      Model model) {
+    public String getAppointmentsByStatusAndPatientId(
+            @RequestParam Long patientId,
+            @RequestParam(required = false, defaultValue = "Booked") String status, 
+            Model model) {
         try {
-        	List<Appointment> appointments = appointmentServiceImpl.findByPatientIdAndStatus(patientId, status);
-        	Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            List<Appointment> appointments = appointmentServiceImpl.findByPatientIdAndStatus(patientId, status);
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String loggedInEmail = authentication.getName();
             
-           Patient patient = patientServiceImpl.getPatientByEmail(loggedInEmail);
+            Patient patient = patientServiceImpl.getPatientByEmail(loggedInEmail);
             model.addAttribute("patient", patient);
-        	model.addAttribute("appointments", appointments);
-            model.addAttribute("status", status); // Add status to model for rendering
+            model.addAttribute("appointments", appointments);
+            model.addAttribute("status", status); 
             return "viewAppointments";
         } catch (AppointmentNotFoundException ex) {
-        	Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String loggedInEmail = authentication.getName();
 
-           Patient patient = patientServiceImpl.getPatientByEmail(loggedInEmail);
+            Patient patient = patientServiceImpl.getPatientByEmail(loggedInEmail);
             model.addAttribute("patient", patient);
-        	model.addAttribute("errorMessage", ex.getMessage());
-        	return "viewAppointments";
+            model.addAttribute("errorMessage", ex.getMessage());
+            return "viewAppointments";
         }
     }
 
@@ -239,7 +248,9 @@ public class AppointmentController {
         @ApiResponse(responseCode = "200", description = "Appointment found"),
         @ApiResponse(responseCode = "404", description = "Appointment not found")
     })
-    public String findAppointmentById(@PathVariable Long appointmentId, Model model) {
+    public String findAppointmentById(
+            @PathVariable Long appointmentId, 
+            Model model) {
         Appointment appointment = appointmentServiceImpl.findAppointmentById(appointmentId);
         model.addAttribute("appointment", appointment);
         return "appointmentDetails";
@@ -254,7 +265,13 @@ public class AppointmentController {
      */
     @GetMapping("/listMed")
     @Operation(summary = "List medications for an appointment")
-    public String getMedicationByAppointmentId(@RequestParam Long appointmentId, Model model) {
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Medications found"),
+        @ApiResponse(responseCode = "404", description = "Appointment not found")
+    })
+    public String getMedicationByAppointmentId(
+            @RequestParam Long appointmentId, 
+            Model model) {
         List<Medication> medications = medicationServiceImpl.getMedications(appointmentId);
         model.addAttribute("medications", medications);
         Appointment appointment = appointmentServiceImpl.findAppointmentById(appointmentId);

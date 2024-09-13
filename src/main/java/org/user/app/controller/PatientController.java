@@ -28,28 +28,20 @@ public class PatientController {
     @Autowired
     private PatientServiceImpl patientServiceImpl;
 
-    /**
-     * Show the patient registration form.
-     *
-     * @param model the model to add attributes for Thymeleaf rendering
-     * @return the name of the Thymeleaf template to render
-     */
+
+    // Show the patient registration form
     @GetMapping("/getform")
     @Operation(summary = "Show patient registration form", 
                description = "Render the form to register a new patient")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Registration form successfully rendered")
+    })
     public String showRegistrationForm(Model model) {
         model.addAttribute("patient", new Patient());
         return "registerPatient";
     }
 
-    /**
-     * Register a new patient.
-     *
-     * @param patient the patient entity to be registered
-     * @param result the binding result to handle validation errors
-     * @param model the model to add attributes for Thymeleaf rendering
-     * @return the name of the Thymeleaf template to render
-     */
+    // Register a new patient
     @PostMapping("/register")
     @Operation(summary = "Register a new patient", 
                description = "Handle patient registration form submission")
@@ -68,50 +60,46 @@ public class PatientController {
         model.addAttribute("patient", new Patient());
         return "registerPatient";
     }
-    
-    /**
-     * Retrieve and display the information of the currently logged-in patient.
-     *
-     * @param model the model object to which the patient details will be added
-     * @return the name of the view template to be rendered.
-     */
+
+    // Retrieve and display the information of the currently logged-in patient
     @GetMapping("/view")
+    @Operation(summary = "Retrieve patient information", 
+               description = "Display the information of the currently logged-in patient")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Patient information retrieved successfully"),
+        @ApiResponse(responseCode = "404", description = "Patient not found")
+    })
     public String viewPatient(Model model) {
-    
+
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String loggedInEmail = authentication.getName();
 
-
         Patient patient = patientServiceImpl.getPatientByEmail(loggedInEmail);
-     
+
         model.addAttribute("patient", patient);
 
         return "viewPatient";
     }
-    
-    /**
-     * View all patients associated with a specific doctor.
-     *
-     * @param doctor the doctor whose patients are to be retrieved.
-     * @param model the model to add attributes for Thymeleaf rendering
-     * @return the name of the Thymeleaf template to render
-     */
+
+    // View all patients associated with a specific doctor
     @GetMapping("/doctors")
-    @Operation(summary = "View all patients for the logged-in doctor")
+    @Operation(summary = "View all patients for the logged-in doctor", 
+               description = "Retrieve and display all patients associated with the currently logged-in doctor")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Patients found"),
-        @ApiResponse(responseCode = "400", description = "Error fetching patients")
+        @ApiResponse(responseCode = "200", description = "Patients found and displayed successfully"),
+        @ApiResponse(responseCode = "400", description = "Error fetching patients"),
+        @ApiResponse(responseCode = "404", description = "Doctor not found")
     })
     public String viewDoctors(Model model) {
-  
+
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String loggedInEmail = authentication.getName(); 
 
         Patient patient = patientServiceImpl.getPatientByEmail(loggedInEmail);
-              
+
         Set<Doctor> doctors = patientServiceImpl.viewDoctors(patient);
         model.addAttribute("doctors", doctors);
-     
+
         return "listDoctors";
     }
    

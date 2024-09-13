@@ -41,7 +41,6 @@ public class DoctorController {
     @Autowired
     private AppointmentServiceImpl appointmentServiceImpl;
 
-
     /**
      * Show the doctor registration form.
      *
@@ -51,6 +50,7 @@ public class DoctorController {
     @GetMapping("/getform")
     @Operation(summary = "Show doctor registration form", 
                description = "Render the form to register a new doctor")
+    @ApiResponse(responseCode = "200", description = "Doctor registration form displayed")
     public String showRegistrationForm(Model model) {
         model.addAttribute("doctor", new Doctor());
         return "registerDoctor";
@@ -73,7 +73,7 @@ public class DoctorController {
     })
     public String registerDoctor(@Valid @ModelAttribute Doctor doctor, BindingResult result, Model model) {
         if (result.hasErrors()) {
-            // If there are validation errors, return to the registration form with error messages
+            // Return to the registration form with error messages
             return "registerDoctor";
         }
 
@@ -84,9 +84,8 @@ public class DoctorController {
     }
 
     /**
-     * View all patients associated with a specific doctor.
+     * View all patients associated with the logged-in doctor.
      *
-     * @param doctor the doctor whose patients are to be retrieved.
      * @param model the model to add attributes for Thymeleaf rendering
      * @return the name of the Thymeleaf template to render
      */
@@ -97,20 +96,16 @@ public class DoctorController {
         @ApiResponse(responseCode = "400", description = "Error fetching patients")
     })
     public String viewPatients(Model model) {
-  
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String doctorEmail = authentication.getName(); 
+        String doctorEmail = authentication.getName();
 
         Doctor doctor = doctorServiceImpl.getDoctorByEmail(doctorEmail);
-              
         Set<Patient> patients = doctorServiceImpl.findPatients(doctor);
         model.addAttribute("patients", patients);
-     
+
         return "listPatients";
     }
-  
-    
-   
+
     /**
      * Show a form to select a date for viewing appointments.
      *
@@ -119,28 +114,23 @@ public class DoctorController {
      */
     @GetMapping("/appointments/selectDate")
     @Operation(summary = "Show a form to select a date for viewing appointments")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Date selection form displayed")
-    })
+    @ApiResponse(responseCode = "200", description = "Date selection form displayed")
     public String showDateSelectionForm(Model model) {
- 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Doctor doctor = doctorRepository.findByEmail(authentication.getName()); 
-        
+        Doctor doctor = doctorRepository.findByEmail(authentication.getName());
         Long doctorId = doctor.getId();
-        
         model.addAttribute("doctorId", doctorId);
-       
+
         return "doctorAppointments";
     }
-    
+
     /**
      * View all appointments for the logged-in doctor on a specific date.
      *
-     * @param date the date for which to view the appointments. Must be provided as a request parameter.
-     * @param model the model object used to pass attributes to the view.
-     * @return the name of the view to display the appointments.
-     * @throws NoAvailableAppointmentsException if no appointments are found for the given doctor and date.
+     * @param date the date for which to view the appointments
+     * @param model the model object used to pass attributes to the view
+     * @return the name of the view to display the appointments
+     * @throws NoAvailableAppointmentsException if no appointments are found
      */
     @GetMapping("/appointments")
     @Operation(summary = "View all appointments for the logged-in doctor on a specific date")
@@ -149,29 +139,26 @@ public class DoctorController {
         @ApiResponse(responseCode = "400", description = "Error fetching appointments")
     })
     public String viewDoctorAppointments(
-            @RequestParam LocalDate date,
+            @RequestParam @Parameter(description = "Date for viewing appointments") LocalDate date,
             Model model) {
 
-      
-        try {Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Doctor doctor = doctorRepository.findByEmail(authentication.getName()); 
-        
-        Long doctorId = doctor.getId();
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            Doctor doctor = doctorRepository.findByEmail(authentication.getName());
+            Long doctorId = doctor.getId();
 
-        List<Appointment> appointments = appointmentServiceImpl.viewAppointments(doctorId, date);
-        
-        model.addAttribute("appointments", appointments);
-        model.addAttribute("doctorId", doctorId);
-        model.addAttribute("date", date);
+            List<Appointment> appointments = appointmentServiceImpl.viewAppointments(doctorId, date);
+            model.addAttribute("appointments", appointments);
+            model.addAttribute("doctorId", doctorId);
+            model.addAttribute("date", date);
 
-             return "doctorAppointments";
-             
-        } catch (AppointmentNotFoundException ex){
-        	
-        model.addAttribute("errorMessage", ex.getMessage());	
-        	 return "doctorAppointments";
+            return "doctorAppointments";
+
+        } catch (AppointmentNotFoundException ex) {
+            model.addAttribute("errorMessage", ex.getMessage());
+            return "doctorAppointments";
         }
-    } 
+    }
 
     /**
      * Show the form to update the status of an appointment.
@@ -193,9 +180,9 @@ public class DoctorController {
 
         Appointment appointment = appointmentServiceImpl.findAppointmentById(appointmentId);
         model.addAttribute("appointment", appointment);
-        return "updateAppointmentStatusForm";  // Name of Thymeleaf template to render the form
+        return "updateAppointmentStatusForm";  // Thymeleaf template name
     }
-    
+
     /**
      * Update the status of an appointment.
      *
@@ -218,30 +205,29 @@ public class DoctorController {
 
         // Update the appointment status
         Appointment updatedAppointment = appointmentServiceImpl.updateAppointmentStatus(appointmentId, status);
-        
-        // Add the updated appointment to the model
         model.addAttribute("appointment", updatedAppointment);
-        
-      
+
         return "redirect:/doctors/appointments?date=" + updatedAppointment.getAppointmentDate() 
                 + "&doctorId=" + updatedAppointment.getDoctor().getId();
     }
-    
+
     /**
      * View the details of the logged-in doctor.
      *
-     * @param model the model object used to pass attributes to the view.
-     * @return the name of the view to display the doctor's details.
+     * @param model the model object used to pass attributes to the view
+     * @return the name of the view to display the doctor's details
      */
     @GetMapping("/view")
+    @Operation(summary = "View details of the logged-in doctor", 
+               description = "Retrieve and display details of the currently logged-in doctor")
+    @ApiResponse(responseCode = "200", description = "Doctor details displayed")
     public String viewDoctor(Model model) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String loggedInEmail = authentication.getName();
 
-        // Fetch the doctor by their email
         Doctor doctor = doctorServiceImpl.getDoctorByEmail(loggedInEmail);
         model.addAttribute("doctor", doctor);
-        
+
         return "viewDoctor";
     }
     
