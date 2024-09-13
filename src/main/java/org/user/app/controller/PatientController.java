@@ -2,6 +2,8 @@ package org.user.app.controller;
  
 
 
+import java.util.Set;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -9,6 +11,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.user.app.entity.Doctor;
 import org.user.app.entity.Patient;
 import org.user.app.service.PatientServiceImpl;
 
@@ -85,4 +88,31 @@ public class PatientController {
 
         return "viewPatient";
     }
+    
+    /**
+     * View all patients associated with a specific doctor.
+     *
+     * @param doctor the doctor whose patients are to be retrieved.
+     * @param model the model to add attributes for Thymeleaf rendering
+     * @return the name of the Thymeleaf template to render
+     */
+    @GetMapping("/doctors")
+    @Operation(summary = "View all patients for the logged-in doctor")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Patients found"),
+        @ApiResponse(responseCode = "400", description = "Error fetching patients")
+    })
+    public String viewDoctors(Model model) {
+  
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String loggedInEmail = authentication.getName(); 
+
+        Patient patient = patientServiceImpl.getPatientByEmail(loggedInEmail);
+              
+        Set<Doctor> doctors = patientServiceImpl.viewDoctors(patient);
+        model.addAttribute("doctors", doctors);
+     
+        return "listDoctors";
+    }
+   
 }

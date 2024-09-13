@@ -5,7 +5,6 @@ import org.springframework.stereotype.Repository;
 import org.user.app.entity.Appointment;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,10 +12,6 @@ import java.util.Optional;
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
 
 
-    /**
-     * Find appointments by doctor and patient ID.
-     */
-    List<Appointment> findByDoctorIdAndPatientId(Long doctorId, Long patientId);
 
     /**
      * Find available appointments for a doctor by date.
@@ -44,10 +39,6 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
      */
     Optional<Appointment> findByIdAndPatientId(Long apointmentId, Long patientId);
     
-    /**
-     * Find appointments within a time range for a doctor on a specific date.
-     */
-    List<Appointment> findByDoctorIdAndAppointmentDateAndStartTimeBetween(
-            Long doctorId, LocalDate date, LocalTime startTime, LocalTime endTime);
+  
 }
   

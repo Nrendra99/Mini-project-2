@@ -36,9 +36,9 @@
             <p><strong>Specialization:</strong> <span th:text="${doctor.specialization}"></span></p>
         </div>
     </div>
-    <!-- Actions for updating details, viewing appointments, and logging out -->
+    <!-- Actions for viewing Patients, viewing appointments, and logging out -->
     <div class="text-center">
-        <a th:href="@{/doctors/update}" class="btn btn-primary">Update Your details</a> 
+        <a th:href="@{/doctors/patients}" class="btn btn-primary">View Patients</a> 
         <a th:href="@{/doctors/appointments/selectDate}" class="btn btn-primary">View Appointments</a><br><br>
         <form th:action="@{/logout}" method="post">
             <button type="submit" class="btn btn-danger">Logout</button>

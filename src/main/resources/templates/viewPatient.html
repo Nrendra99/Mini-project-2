@@ -40,7 +40,8 @@
     
     <!-- Actions for booking appointments, viewing appointments, and logging out -->
     <div class="text-center">
-        <a th:href="@{/appointments/availableDoctors}" class="btn btn-primary">Book Appointment</a><br><br>
+        <a th:href="@{/patients/doctors}" class="btn btn-primary">View Doctors</a> 
+        <a th:href="@{/appointments/availableDoctors}" class="btn btn-primary">Book Appointment</a>
         <a th:href="@{/appointments/viewAll(patientId=${patient.Id})}" class="btn btn-primary">View Appointments</a><br><br>
         <form th:action="@{/logout}" method="post">
             <button type="submit" class="btn btn-danger">Logout</button>

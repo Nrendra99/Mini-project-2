@@ -1,16 +1,7 @@
 package org.user.app.entity;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-
 import jakarta.persistence.*;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 @Entity
 public class Medication {
 
@@ -27,7 +18,73 @@ public class Medication {
     
     private String instructions;  // Special instructions for medication usage
 
-    @ManyToOne
-    @JoinColumn(name = "appointment_id" , nullable=false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "appointment_id")
     private Appointment appointment;  // The appointment associated with this medication
+
+	public Long getId() {
+		return Id;
+	}
+
+	public void setId(Long id) {
+		Id = id;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getDosage() {
+		return dosage;
+	}
+
+	public void setDosage(String dosage) {
+		this.dosage = dosage;
+	}
+
+	public String getFrequency() {
+		return frequency;
+	}
+
+	public void setFrequency(String frequency) {
+		this.frequency = frequency;
+	}
+
+	public String getInstructions() {
+		return instructions;
+	}
+
+	public void setInstructions(String instructions) {
+		this.instructions = instructions;
+	}
+
+	public Appointment getAppointment() {
+		return appointment;
+	}
+
+	public void setAppointment(Appointment appointment) {
+		this.appointment = appointment;
+	}
+
+	public Medication(Long id, String name, String dosage, String frequency, String instructions,
+			Appointment appointment) {
+		super();
+		Id = id;
+		this.name = name;
+		this.dosage = dosage;
+		this.frequency = frequency;
+		this.instructions = instructions;
+		this.appointment = appointment;
+	}
+
+	public Medication() {
+		
+	}
+    
+    
+    
 }

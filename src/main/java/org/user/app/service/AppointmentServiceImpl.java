@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.user.app.entity.Appointment;
 import org.user.app.entity.Doctor;
+import org.user.app.entity.Medication;
 import org.user.app.entity.Patient;
 import org.user.app.exceptions.AppointmentNotFoundException;
 import org.user.app.exceptions.CannotCancelWithinFourHoursException;
@@ -33,6 +34,9 @@ public class AppointmentServiceImpl implements AppointmentService {
     
     @Autowired
     private PatientRepository patientRepository;
+    
+    @Autowired
+    private PatientServiceImpl patientServiceImpl;
     
 
     /**
@@ -69,6 +73,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         }
         return appointments;
     }
+    
     /**
      * Create half-hour appointment slots for a specific doctor within a date range.
      *
@@ -121,11 +126,15 @@ public class AppointmentServiceImpl implements AppointmentService {
         Patient patient = patientRepository.findById(patientId)
                 .orElseThrow(() -> new PatientNotFoundException("Patient not found with ID: " + patientId));
         
+        Doctor doctor = availableAppointment.getDoctor();
+        
         // Set appointment details
         availableAppointment.setPatient(patient);
         availableAppointment.setAvailable(false);
         availableAppointment.setStatus("BOOKED");
         availableAppointment.setSymptoms(availableAppointment.getSymptoms());
+        
+        patientServiceImpl.addDoctor(patient, doctor);
  
         return appointmentRepository.save(availableAppointment);
     }
@@ -177,12 +186,14 @@ public class AppointmentServiceImpl implements AppointmentService {
         if (appointmentDateTime.isBefore(now.plusHours(4))) {
             throw new CannotCancelWithinFourHoursException("Cannot cancel within 4 hours of the appointment.");
         }
-
+         
+       
         appointment.setStatus("AVAILABLE");
         appointment.setAvailable(true);
         appointment.setPatient(null);
         appointment.setSymptoms(null);
-        appointment.setMedications(null);
+        appointment.getMedications().clear();
+        
 
         return appointmentRepository.save(appointment);
     }
@@ -219,6 +230,23 @@ public class AppointmentServiceImpl implements AppointmentService {
         }
         return appointments;
     }
+    
+    @Override
+    public Appointment save(Appointment appointment){
+    	
+    	return appointmentRepository.save(appointment);
+    }
+    
+    @Override
+    public Appointment addMeds(Long appointmentId, Medication medication) {
+      	 Appointment appointment = appointmentRepository.findById(appointmentId)	
+      	          .orElseThrow(() -> new AppointmentNotFoundException("Appointment not found"));
+      	 
+        
+      		appointment.addMedication(medication);
+      		return save(appointment);
+   
+      }
     
    
 }

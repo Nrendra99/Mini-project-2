@@ -2,7 +2,9 @@ package org.user.app.service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
+import org.user.app.entity.Doctor;
 import org.user.app.entity.Patient;
 
 public interface PatientService {
@@ -52,4 +54,18 @@ public interface PatientService {
      */
 	Patient updatePatient(Long id, Patient updatedPatient);
 	
+	/**
+     * Adds a doctor to a patient's list of doctors and registers the updated patient.
+     *
+     * @param patient the patient to whom the doctor will be added.
+     * @param doctor the doctor to be added to the patient's list of doctors.
+     */
+	Patient addDoctor(Patient patient, Doctor doctor);
+	
+	/**
+     * Find all doctors associated with a specific patient.
+     *
+     * @param patient the patient whose doctors are to be retrieved.
+     */
+	Set<Doctor> viewDoctors(Patient patient);
 }

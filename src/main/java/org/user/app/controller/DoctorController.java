@@ -18,8 +18,7 @@ import org.user.app.service.DoctorServiceImpl;
 
 import java.time.LocalDate;
 import java.util.List;
-
-
+import java.util.Set;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -87,7 +86,7 @@ public class DoctorController {
     /**
      * View all patients associated with a specific doctor.
      *
-     * @param doctorId the ID of the doctor
+     * @param doctor the doctor whose patients are to be retrieved.
      * @param model the model to add attributes for Thymeleaf rendering
      * @return the name of the Thymeleaf template to render
      */
@@ -104,13 +103,12 @@ public class DoctorController {
 
         Doctor doctor = doctorServiceImpl.getDoctorByEmail(doctorEmail);
               
-        List<Patient> patients = doctorServiceImpl.findPatientsByDoctorId(doctor.getId());
+        Set<Patient> patients = doctorServiceImpl.findPatients(doctor);
         model.addAttribute("patients", patients);
-        model.addAttribute("doctorId", doctor.getId());
-
+     
         return "listPatients";
     }
-   
+  
     
    
     /**
@@ -236,7 +234,7 @@ public class DoctorController {
      * @return the name of the view to display the doctor's details.
      */
     @GetMapping("/view")
-    public String viewPatient(Model model) {
+    public String viewDoctor(Model model) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String loggedInEmail = authentication.getName();
 

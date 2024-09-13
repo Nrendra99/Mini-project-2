@@ -87,7 +87,7 @@ public class AdminController {
     @Operation(summary = "Update doctor details")
     public String updateDoctor(@PathVariable Long id, @Valid @ModelAttribute("doctor") Doctor updatedDoctor, BindingResult result, Model model) {
         doctorServiceImpl.updateDoctor(id, updatedDoctor);
-        return "redirect:/admin/listDoctors"; // Redirect to the list of doctors
+        return "redirect:/admin/docList"; // Redirect to the list of doctors
     }
 
     // Method to delete a doctor by ID
@@ -95,7 +95,7 @@ public class AdminController {
     @Operation(summary = "Delete a doctor by ID")
     public String deleteDoctor(@PathVariable Long id) {
         doctorServiceImpl.deleteDoctor(id);
-        return "redirect:/doctors/viewDoctors"; // Redirect to doctor list
+        return "redirect:/admin/docList"; // Redirect to doctor list
     }
 
     // Method to list all doctors

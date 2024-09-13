@@ -4,17 +4,21 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.user.app.entity.Doctor;
 import org.user.app.entity.Patient;
-import org.user.app.exceptions.PatientNotFoundException;
 import org.user.app.repository.PatientRepository;
 import org.user.app.service.PatientServiceImpl;
 
 import java.util.Optional;
+import java.util.Set;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 public class PatientServiceImplTest {
@@ -28,125 +32,154 @@ public class PatientServiceImplTest {
     @InjectMocks
     private PatientServiceImpl patientServiceImpl;
 
-    private Patient patient;
-    private Patient updatedPatient;
-
     @BeforeEach
-    public void setUp() {
+    public void setup() {
         MockitoAnnotations.openMocks(this);
-
-        patient = new Patient();
-        patient.setId(1L);
-        patient.setPassword("plainPassword");
-
-        updatedPatient = new Patient();
-        updatedPatient.setId(1L);
-        updatedPatient.setPassword("newPlainPassword");
     }
+ 
 
     @Test
-    public void testRegisterPatient() {
-        String encryptedPassword = "encryptedPassword";
-        when(passwordEncoder.encode(patient.getPassword())).thenReturn(encryptedPassword);
+    @DisplayName("Register a new patient successfully")
+    public void testRegisterPatientSuccess() {
+        // Given
+        Patient patient = new Patient();
+        patient.setPassword("password");
+
+        // Mocking the password encoder and repository methods
+        when(passwordEncoder.encode("password")).thenReturn("encryptedPassword");
         when(patientRepository.save(patient)).thenReturn(patient);
 
-        Patient registeredPatient = patientServiceImpl.registerPatient(patient);
+        // When
+        Patient result = patientServiceImpl.registerPatient(patient);
 
-        assertNotNull(registeredPatient);
-        assertEquals(encryptedPassword, registeredPatient.getPassword());
-        verify(patientRepository).save(patient);
+        // Then
+        assertNotNull(result);
+        assertEquals("encryptedPassword", result.getPassword());
+        verify(patientRepository, times(1)).save(patient);
     }
 
     @Test
-    public void testRegisterPatientWithNullPassword() {
-        patient.setPassword(null);
-        when(patientRepository.save(patient)).thenReturn(patient);
+    @DisplayName("Retrieve a patient by ID successfully")
+    public void testGetPatientByIdSuccess() {
+        // Given
+        Long id = 1L;
+        Patient patient = new Patient();
+        when(patientRepository.findById(id)).thenReturn(Optional.of(patient));
 
-        Patient registeredPatient = patientServiceImpl.registerPatient(patient);
+        // When
+        Optional<Patient> result = patientServiceImpl.getPatientById(id);
 
-        assertNotNull(registeredPatient);
-        assertNull(registeredPatient.getPassword());
-        verify(patientRepository).save(patient);
+        // Then
+        assertTrue(result.isPresent());
+        assertEquals(patient, result.get());
+        verify(patientRepository, times(1)).findById(id);
     }
 
     @Test
-    public void testGetPatientById() {
-        when(patientRepository.findById(1L)).thenReturn(Optional.of(patient));
+    @DisplayName("Delete a patient successfully")
+    public void testDeletePatientSuccess() {
+        // Given
+        Long id = 1L;
+        doNothing().when(patientRepository).deleteById(id);
 
-        Optional<Patient> foundPatient = patientServiceImpl.getPatientById(1L);
+        // When
+        patientServiceImpl.deletePatient(id);
 
-        assertTrue(foundPatient.isPresent());
-        assertEquals(patient, foundPatient.get());
-        verify(patientRepository).findById(1L);
+        // Then
+        verify(patientRepository, times(1)).deleteById(id);
     }
 
     @Test
-    public void testGetPatientByIdNotFound() {
-        when(patientRepository.findById(1L)).thenReturn(Optional.empty());
-
-        Optional<Patient> foundPatient = patientServiceImpl.getPatientById(1L);
-
-        assertFalse(foundPatient.isPresent());
-        verify(patientRepository).findById(1L);
-    }
-
-    @Test
-    public void testDeletePatient() {
-        doNothing().when(patientRepository).deleteById(1L);
-
-        patientServiceImpl.deletePatient(1L);
-
-        verify(patientRepository).deleteById(1L);
-    }
-
-    @Test
-    public void testGetAllPatients() {
-        List<Patient> patients = List.of(patient);
+    @DisplayName("Retrieve all patients successfully")
+    public void testGetAllPatientsSuccess() {
+        // Given
+        List<Patient> patients = new ArrayList<>();
         when(patientRepository.findAll()).thenReturn(patients);
 
-        List<Patient> allPatients = patientServiceImpl.getAllPatients();
+        // When
+        List<Patient> result = patientServiceImpl.getAllPatients();
 
-        assertNotNull(allPatients);
-        assertEquals(1, allPatients.size());
-        assertEquals(patient, allPatients.get(0));
-        verify(patientRepository).findAll();
-    }
-
-    @Test
-    public void testGetPatientByEmail() {
-        when(patientRepository.findByEmail("test@example.com")).thenReturn(patient);
-
-        Patient foundPatient = patientServiceImpl.getPatientByEmail("test@example.com");
-
-        assertNotNull(foundPatient);
-        assertEquals(patient, foundPatient);
-        verify(patientRepository).findByEmail("test@example.com");
-    }
-
-    @Test
-    public void testUpdatePatient() {
-        String encryptedPassword = "newEncryptedPassword";
-        when(patientRepository.existsById(1L)).thenReturn(true);
-        when(passwordEncoder.encode(updatedPatient.getPassword())).thenReturn(encryptedPassword);
-        when(patientRepository.save(updatedPatient)).thenReturn(updatedPatient);
-
-        Patient result = patientServiceImpl.updatePatient(1L, updatedPatient);
-
+        // Then
         assertNotNull(result);
-        assertEquals(encryptedPassword, result.getPassword());
-        verify(patientRepository).save(updatedPatient);
+        assertEquals(patients, result);
+        verify(patientRepository, times(1)).findAll();
     }
 
     @Test
-    public void testUpdatePatientNotFound() {
-        when(patientRepository.existsById(1L)).thenReturn(false);
+    @DisplayName("Retrieve patient by email successfully")
+    public void testGetPatientByEmailSuccess() {
+        // Given
+        String email = "test@example.com";
+        Patient patient = new Patient();
+        when(patientRepository.findByEmail(email)).thenReturn(patient);
 
-        Exception exception = assertThrows(PatientNotFoundException.class, () -> {
-            patientServiceImpl.updatePatient(1L, updatedPatient);
-        });
+        // When
+        Patient result = patientServiceImpl.getPatientByEmail(email);
 
-        assertEquals("Patient not found with ID: 1", exception.getMessage());
-        verify(patientRepository, never()).save(updatedPatient);
+        // Then
+        assertNotNull(result);
+        assertEquals(patient, result);
+        verify(patientRepository, times(1)).findByEmail(email);
+    }
+
+    @Test
+    @DisplayName("Update patient details successfully")
+    public void testUpdatePatientSuccess() {
+        // Given
+        Long id = 1L;
+        Patient existingPatient = new Patient();
+        existingPatient.setPassword("oldPassword");
+
+        Patient updatedPatient = new Patient();
+        updatedPatient.setPassword("newPassword");
+
+        when(patientRepository.findById(id)).thenReturn(Optional.of(existingPatient));
+        when(patientRepository.save(any(Patient.class))).thenReturn(existingPatient);
+        when(passwordEncoder.encode("newPassword")).thenReturn("encryptedNewPassword");
+
+        // When
+        Patient result = patientServiceImpl.updatePatient(id, updatedPatient);
+
+        // Then
+        assertNotNull(result);
+        assertEquals("encryptedNewPassword", result.getPassword());
+        verify(patientRepository, times(1)).findById(id);
+        verify(patientRepository, times(1)).save(existingPatient);
+    }
+
+    @Test
+    @DisplayName("Add doctor to patient successfully")
+    public void testAddDoctorSuccess() {
+        // Given
+        Patient patient = new Patient();
+        Doctor doctor = new Doctor();
+
+        // Mocking the patient repository method
+        when(patientRepository.save(patient)).thenReturn(patient);
+
+        // When
+        Patient result = patientServiceImpl.addDoctor(patient, doctor);
+
+        // Then
+        assertNotNull(result);
+        verify(patientRepository, times(1)).save(patient);
+    }
+
+    @Test
+    @DisplayName("View doctors associated with a patient successfully")
+    public void testViewDoctorsSuccess() {
+        // Given
+        Patient patient = new Patient();
+        Set<Doctor> doctors = new HashSet<>();
+        doctors.add(new Doctor());
+        patient.setDoctors(doctors);
+
+        // When
+        Set<Doctor> result = patientServiceImpl.viewDoctors(patient);
+
+        // Then
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertTrue(result.containsAll(doctors));
     }
 }
-

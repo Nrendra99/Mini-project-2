@@ -3,7 +3,6 @@ package org.user.app.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.user.app.entity.Appointment;
 import org.user.app.entity.Medication;
 import org.user.app.exceptions.AppointmentNotFoundException;
 import org.user.app.exceptions.MedicationNotFoundException;
@@ -22,23 +21,7 @@ public class MedicationServiceImpl implements MedicationService {
     @Autowired
     private AppointmentRepository appointmentRepository;
     
-    /**
-     * Add a new medication to a specific appointment.
-     *
-     * @param appointmentId the ID of the appointment to which the medication will be added
-     * @param medication the medication entity to be added
-     */
-    @Transactional
-    public void addMedicationToAppointment(Long appointmentId, Medication medication) {
-        // Find the appointment by ID
-        Appointment appointment = appointmentRepository.findById(appointmentId)
-                .orElseThrow(() -> new AppointmentNotFoundException("Appointment not found"));
-       
-       
-        medication.setAppointment(appointment);
-        medicationRepository.save(medication);
-    }
-
+ 
     /**
      * Update details of an existing medication.
      *
@@ -50,8 +33,6 @@ public class MedicationServiceImpl implements MedicationService {
         if (!medicationRepository.existsById(medication.getId())) {
             throw new MedicationNotFoundException("Medication with ID " + medication.getId() + " not found");
         }
-        
-        // Save the updated medication to the database
         return medicationRepository.save(medication);
     }
     /**
@@ -62,11 +43,10 @@ public class MedicationServiceImpl implements MedicationService {
     @Transactional
     @Override
     public void removeMedication(Long medicationId) {
-        // Retrieve the medication by its ID
         Medication medication = medicationRepository.findById(medicationId)
                 .orElseThrow(() -> new MedicationNotFoundException("Medication with ID " + medicationId + " not found"));
 
-        medicationRepository.delete(medication); // Delete the medication from the database
+        medicationRepository.delete(medication); 
     }
 
     /**

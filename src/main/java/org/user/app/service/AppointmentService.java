@@ -2,6 +2,7 @@ package org.user.app.service;
 
 import org.user.app.entity.Appointment;
 import org.user.app.entity.Doctor;
+import org.user.app.entity.Medication;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -80,4 +81,8 @@ public interface AppointmentService {
      * @param date the date for which to view appointments
      */
     List<Appointment> viewAppointments(Long doctorId, LocalDate date);
+    
+    Appointment save(Appointment appointment);
+    
+    Appointment addMeds(Long appointmentId, Medication medication);
 }

@@ -9,14 +9,7 @@ import org.user.app.entity.Medication;
 
 public interface MedicationService {
 
-    /**
-     * Add a new medication to a specific appointment.
-     *
-     * @param appointmentId the ID of the appointment to which the medication will be added
-     * @param medication the medication entity to be added
-     */
-	void addMedicationToAppointment(Long appointmentId, Medication medication);
-
+   
     /**
      * Update details of an existing medication.
      *

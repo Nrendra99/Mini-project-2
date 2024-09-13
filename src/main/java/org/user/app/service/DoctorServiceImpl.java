@@ -8,12 +8,14 @@ import org.user.app.entity.Doctor;
 import org.user.app.entity.Patient;
 import org.user.app.exceptions.DoctorNotFoundException;
 import org.user.app.repository.DoctorRepository;
-import org.user.app.repository.PatientRepository;
+
 
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+
 
 
 @Service
@@ -21,9 +23,6 @@ public class DoctorServiceImpl implements DoctorService {
 
     @Autowired
     private DoctorRepository doctorRepository;
-    
-    @Autowired
-    private PatientRepository patientRepository;
     
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -71,12 +70,12 @@ public class DoctorServiceImpl implements DoctorService {
     /**
      * Find all patients associated with a specific doctor.
      *
-     * @param doctorId the unique ID of the doctor whose patients are to be retrieved.
+     * @param doctor the doctor whose patients are to be retrieved.
      * @return a list of patients associated with the specified doctor.
      */
-    @Transactional
-    public List<Patient> findPatientsByDoctorId(Long doctorId) {
-        return patientRepository.findByDoctorId(doctorId);
+    @Override
+    public Set<Patient> findPatients(Doctor doctor) {
+        return doctor.getPatients();
     }
 
     /**
@@ -123,10 +122,11 @@ public class DoctorServiceImpl implements DoctorService {
         if (!doctorRepository.existsById(id)) {
             throw new DoctorNotFoundException("Doctor not found with ID: " + id);
         }
-        // Encrypt the updated doctor's password before saving
+        
         String encryptedPassword = passwordEncoder.encode(updatedDoctor.getPassword());
         updatedDoctor.setPassword(encryptedPassword);
         
         return doctorRepository.save(updatedDoctor);
     }
+    
 }

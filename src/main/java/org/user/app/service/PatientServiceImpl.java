@@ -3,11 +3,13 @@ package org.user.app.service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.user.app.entity.Doctor;
 import org.user.app.entity.Patient;
 import org.user.app.exceptions.PatientNotFoundException;
 import org.user.app.repository.PatientRepository;
@@ -90,14 +92,50 @@ public class PatientServiceImpl implements PatientService {
      */
     @Override
     public Patient updatePatient(Long id, Patient updatedPatient) {
-        if (!patientRepository.existsById(id)) {
-            throw new PatientNotFoundException("Patient not found with ID: " + id);
-        }
+
+        Patient existingPatient = patientRepository.findById(id)
+            .orElseThrow(() -> new PatientNotFoundException("Patient not found with ID: " + id));
+        
+      
+        existingPatient.setFirstName(updatedPatient.getFirstName());
+        existingPatient.setLastName(updatedPatient.getLastName());
+        existingPatient.setEmail(updatedPatient.getEmail());
+        existingPatient.setPassword(updatedPatient.getPassword());
+        existingPatient.setAge(updatedPatient.getAge());
+        existingPatient.setGender(updatedPatient.getGender());
+        existingPatient.setMedicalHistory(updatedPatient.getMedicalHistory());
+
         String encryptedPassword = passwordEncoder.encode(updatedPatient.getPassword());
-        updatedPatient.setPassword(encryptedPassword);
-        return patientRepository.save(updatedPatient);
+        existingPatient.setPassword(encryptedPassword);
+      
+        return patientRepository.save(existingPatient);
     }
- 
+    
+    /**
+     * Adds a doctor to a patient's list of doctors and registers the updated patient.
+     *
+     * @param patient the patient to whom the doctor will be added.
+     * @param doctor the doctor to be added to the patient's list of doctors.
+     * @return the updated patient after the doctor has been added and the patient has been registered.
+     */
+    @Override
+    public Patient addDoctor(Patient patient, Doctor doctor) {
+        
+    	patient.addDoctor(doctor);
+    	return registerPatient(patient);     
+    }
+    
+    /**
+     * Find all doctors associated with a specific patient.
+     *
+     * @param patient the patient whose doctors are to be retrieved.
+     * @return a list of patients associated with the specified doctor.
+     */
+    @Override
+    public Set<Doctor> viewDoctors(Patient patient) {
+    	
+    	return patient.getDoctors();
+    }
 }
         
     

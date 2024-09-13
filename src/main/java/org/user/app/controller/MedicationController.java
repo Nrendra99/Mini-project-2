@@ -74,7 +74,7 @@ public class MedicationController {
             return "addMedication";
         }
         
-        medicationServiceImpl.addMedicationToAppointment(appointmentId, medication);
+        appointmentServiceImpl.addMeds(appointmentId, medication);
         Appointment appointment = appointmentServiceImpl.findAppointmentById(appointmentId);
     	model.addAttribute("appointment" , appointment);
     	model.addAttribute("medication", new Medication());

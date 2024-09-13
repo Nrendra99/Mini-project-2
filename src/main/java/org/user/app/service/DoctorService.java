@@ -3,6 +3,8 @@ package org.user.app.service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+
 import org.user.app.entity.Doctor;
 import org.user.app.entity.Patient;
 
@@ -27,9 +29,9 @@ public interface DoctorService {
     /**
      * Find all patients associated with a specific doctor.
      *
-     * @param doctorId the unique ID of the doctor whose patients are to be retrieved.
+     * @param doctor the doctor whose patients are to be retrieved.
      */
-    public List<Patient> findPatientsByDoctorId(Long doctorId);
+    Set<Patient> findPatients(Doctor doctor);
     
     /**
      * Retrieve a doctor entity by its unique ID.
