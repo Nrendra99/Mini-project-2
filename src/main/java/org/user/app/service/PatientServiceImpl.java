@@ -122,7 +122,7 @@ public class PatientServiceImpl implements PatientService {
     public Patient addDoctor(Patient patient, Doctor doctor) {
         
     	patient.addDoctor(doctor);
-    	return registerPatient(patient);     
+    	return patientRepository.save(patient);     
     }
     
     /**
